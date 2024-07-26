@@ -33,7 +33,6 @@ function createAndShowDialog(targetElement, word, meaning) {
 
   var rect = targetElement.parentElement.getBoundingClientRect();
   dialog.style.top = (window.scrollY + rect.top) + 'px';
-  dialog.style.display = 'flex';  
 
   if (rightSide) {
     dialog.style.left = (window.scrollX + rect.left + rect.width + 30) + 'px';
@@ -136,7 +135,7 @@ function startGame() {
 
 function observeGameStart() {
   const game = document.querySelector('[id="wordle-app-game"]');
-  
+
   if (game) {
     startGame();
   } else {
@@ -145,4 +144,3 @@ function observeGameStart() {
 }
 
 observeGameStart();
-
