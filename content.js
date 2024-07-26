@@ -1,48 +1,3 @@
-var css = `
-.meaning-dialog {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-.meaning-dialog-content {
-  background-color: var(--color-absent);
-  color: var(--key-evaluated-text-color-absent);
-  padding: 10px;
-  width: 300px;
-  text-align: center;
-  position: relative;
-}
-`;
-
-var style = document.createElement('style');
-style.appendChild(document.createTextNode(css));
-document.head.appendChild(style);
-
-function createAndShowDialog(targetElement, word, meaning) {
-  let rightSide = document.querySelectorAll('.meaning-dialog').length % 2 == 0;
-
-  var dialog = document.createElement('div');
-  dialog.className = 'meaning-dialog';
-  dialog.innerHTML = `
-    <div class="meaning-dialog-content">
-      <p><b>${word}</b>: ${meaning}</p>
-    </div>
-  `;
-
-  var rect = targetElement.parentElement.getBoundingClientRect();
-  dialog.style.top = (window.scrollY + rect.top) + 'px';
-
-  if (rightSide) {
-    dialog.style.left = (window.scrollX + rect.left + rect.width + 30) + 'px';
-  } else {
-    dialog.style.right = (window.scrollX + rect.right + 30) + 'px';
-  }
-
-  document.body.appendChild(dialog);
-}
-
 function tiles() {
   return [...document.querySelectorAll('div[aria-roledescription="tile"]')]
 }
@@ -104,6 +59,31 @@ function displaySecretWordMeaning() {
       createAndShowDialog(secretWordElement, secretWord, meaning);
     });
   }, 500);
+}
+
+function createAndShowDialog(targetElement, word, meaning) {
+  let marginGap = 30;
+  let rightSide = document.querySelectorAll('.meaning-dialog').length % 2 == 0;
+  let rect = targetElement.parentElement.getBoundingClientRect();
+  let dialog = document.createElement('div');
+
+  dialog.className = 'meaning-dialog';
+  dialog.innerHTML = `
+    <div class="meaning-dialog-content">
+      <p><b>${word}</b>: ${meaning}</p>
+    </div>
+  `;
+  dialog.style.top = (window.scrollY + rect.top) + 'px';
+
+  if (rightSide) {
+    let left = window.scrollX + rect.left + rect.width + marginGap;
+    dialog.style.left = `${left}px`;
+  } else {
+    let right = window.scrollX + rect.right + marginGap
+    dialog.style.right = `${right}px`;
+  }
+
+  document.body.appendChild(dialog);
 }
 
 const GUESSED_STATES = ['present', 'correct', 'absent'];

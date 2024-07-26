@@ -9,6 +9,7 @@
   },
   "content_scripts": [
     {
+      "css": ["style.css"],
       "js": ["content.js"],
       "matches": [
         "https://www.nytimes.com/games/wordle/index.html"
