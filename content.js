@@ -44,28 +44,18 @@ function createAndShowDialog(targetElement, word, meaning) {
   document.body.appendChild(dialog);
 }
 
-const GUESSED_STATES = ['present', 'correct', 'absent'];
-
 function tiles() {
   return [...document.querySelectorAll('div[aria-roledescription="tile"]')]
 }
 
-function readWords() {
-  return rows().map(row => {
-    if (row.every(letter => GUESSED_STATES.includes(letter.getAttribute('data-state')))) {
-      return row.map(letter => letter.innerText).join('');
-    }
-  }).filter(Boolean);
-}
+function displayWordMeaning(lastLetterElement) {
+  const currentRow = rows().find(row => {
+    return row[row.length - 1] == lastLetterElement
+  });
+  const word = currentRow.map(letter => letter.innerText).join('');
 
-function displayLastWordMeaning(lastLetterElement) {
-  const words = readWords();
-  const lastWord = words[words.length - 1];
-
-  fetchWordMeaning(lastWord, meaning => {
-    console.log(`Meaning: ${meaning}`);
-
-    createAndShowDialog(lastLetterElement, lastWord, meaning);
+  fetchWordMeaning(word, meaning => {
+    createAndShowDialog(lastLetterElement, word, meaning);
   });
 }
 
@@ -97,7 +87,7 @@ function rows() {
 }
 
 function isLastLetter(element) {
-  return rows().find(row => {
+  return rows().some(row => {
     return row[row.length - 1] == element
   });
 }
@@ -117,6 +107,8 @@ function displaySecretWordMeaning() {
   }, 500);
 }
 
+const GUESSED_STATES = ['present', 'correct', 'absent'];
+
 function handleMutation(mutationsList) {
   for (const mutation of mutationsList) {
     if (mutation.type === 'attributes' && mutation.attributeName === 'data-state') {
@@ -124,7 +116,7 @@ function handleMutation(mutationsList) {
       const state = element.getAttribute('data-state');
 
       if (GUESSED_STATES.includes(state) && isLastLetter(element)) {
-        displayLastWordMeaning(element);
+        displayWordMeaning(element);
 
         if (hasGameEndedWithWrongGuess()) {
           displaySecretWordMeaning();
