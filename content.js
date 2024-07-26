@@ -1,3 +1,54 @@
+var css = `
+.simple-dialog {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.simple-dialog-content {
+  background: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  width: 300px;
+  text-align: center;
+  position: relative;
+}
+.simple-dialog-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 20px;
+  cursor: pointer;
+}
+`;
+
+var style = document.createElement('style');
+style.appendChild(document.createTextNode(css));
+document.head.appendChild(style);
+
+function createAndShowDialog(targetElement, word, meaning) {
+  var dialog = document.createElement('div');
+  dialog.className = 'simple-dialog';
+  dialog.innerHTML = `
+    <div class="simple-dialog-content">
+        <span class="simple-dialog-close" style="cursor: pointer;">&times;</span>
+        <p>${word}: ${meaning}</p>
+    </div>
+  `;
+
+  var rect = targetElement.parentElement.getBoundingClientRect();
+  dialog.style.top = (window.scrollY + rect.top) + 'px';
+  dialog.style.left = (window.scrollX + rect.left + rect.width + 30) + 'px';
+  dialog.style.display = 'flex';
+
+  dialog.querySelector('.simple-dialog-close').addEventListener('click', function() {
+    dialog.remove();
+  });
+
+  document.body.appendChild(dialog);
+}
+
 const GUESSED_STATES = ['present', 'correct', 'absent'];
 
 function tiles() {
@@ -12,19 +63,38 @@ function readWords() {
   }).filter(Boolean);
 }
 
-function displayLastWordMeaning() {
+function displayLastWordMeaning(lastLetterElement) {
   const words = readWords();
   const lastWord = words[words.length - 1];
 
-  setTimeout(() => {
-    console.log("fun fact: " + lastWord);
-  }, 500);
+  console.log(`Last word: ${lastWord}`);  
+
+  fetchWordMeaning(lastWord, meaning => {
+    console.log(`Meaning: ${meaning}`);
+
+    createAndShowDialog(lastLetterElement, lastWord, meaning);
+  });
+}
+
+function fetchWordMeaning(word, callback) {
+  const url = `https://api.dictionaryapi.dev/api/v2/entries/en_US/${word}`;
+
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      const meaning = data[0].meanings[0].definitions[0].definition;
+
+      callback(meaning);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
 }
 
 function chunkArray(array, chunkSize) {
   const chunks = [];
   for (let i = 0; i < array.length; i += chunkSize) {
-      chunks.push(array.slice(i, i + chunkSize));
+    chunks.push(array.slice(i, i + chunkSize));
   }
   return chunks;
 }
@@ -43,12 +113,12 @@ function handleMutation(mutationsList) {
   for (const mutation of mutationsList) {
     if (mutation.type === 'attributes' && mutation.attributeName === 'data-state') {
       const element = mutation.target;
-      const newState = element.getAttribute('data-state');
+      const state = element.getAttribute('data-state');
 
-      console.log(`Element's data-state changed to: ${newState}, with letter: ${element.innerText}`);
+      console.log(`Element's data-state changed to: ${state}, with letter: ${element.innerText}`);
       
-      if (GUESSED_STATES.includes(newState) && isLastLetter(element)) {
-        displayLastWordMeaning();
+      if (GUESSED_STATES.includes(state) && isLastLetter(element)) {
+        displayLastWordMeaning(element);
       }
     }
   }
@@ -57,10 +127,10 @@ function handleMutation(mutationsList) {
 function startGame() {
   console.log('Game is starting...');
 
-  const observer = new MutationObserver(handleMutation);
+  const tilesObserver = new MutationObserver(handleMutation);
 
   tiles().forEach(element => {
-    observer.observe(element, { attributes: true });
+    tilesObserver.observe(element, { attributes: true });
   });
 }
 
@@ -75,3 +145,4 @@ function observeGameStart() {
 }
 
 observeGameStart();
+
