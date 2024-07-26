@@ -1,12 +1,12 @@
 var css = `
-.simple-dialog {
+.meaning-dialog {
   position: absolute;
   background: rgba(0, 0, 0, 0.5);
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
-.simple-dialog-content {
+.meaning-dialog-content {
   background: #fff;
   padding: 10px;
   border-radius: 5px;
@@ -14,7 +14,7 @@ var css = `
   text-align: center;
   position: relative;
 }
-.simple-dialog-close {
+.meaning-dialog-close {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -28,21 +28,28 @@ style.appendChild(document.createTextNode(css));
 document.head.appendChild(style);
 
 function createAndShowDialog(targetElement, word, meaning) {
+  let rightSide = document.querySelectorAll('.meaning-dialog').length % 2 == 0;
+
   var dialog = document.createElement('div');
-  dialog.className = 'simple-dialog';
+  dialog.className = 'meaning-dialog';
   dialog.innerHTML = `
-    <div class="simple-dialog-content">
-        <span class="simple-dialog-close" style="cursor: pointer;">&times;</span>
-        <p>${word}: ${meaning}</p>
+    <div class="meaning-dialog-content">
+      <span class="meaning-dialog-close" style="cursor: pointer;">&times;</span>
+      <p><b>${word}</b>: ${meaning}</p>
     </div>
   `;
 
   var rect = targetElement.parentElement.getBoundingClientRect();
   dialog.style.top = (window.scrollY + rect.top) + 'px';
-  dialog.style.left = (window.scrollX + rect.left + rect.width + 30) + 'px';
-  dialog.style.display = 'flex';
+  dialog.style.display = 'flex';  
 
-  dialog.querySelector('.simple-dialog-close').addEventListener('click', function() {
+  if (rightSide) {
+    dialog.style.left = (window.scrollX + rect.left + rect.width + 30) + 'px';
+  } else {
+    dialog.style.right = (window.scrollX + rect.right + 30) + 'px';
+  }
+
+  dialog.querySelector('.meaning-dialog-close').addEventListener('click', function() {
     dialog.remove();
   });
 
