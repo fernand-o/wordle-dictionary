@@ -62,8 +62,6 @@ function displayLastWordMeaning(lastLetterElement) {
   const words = readWords();
   const lastWord = words[words.length - 1];
 
-  console.log(`Last word: ${lastWord}`);  
-
   fetchWordMeaning(lastWord, meaning => {
     console.log(`Meaning: ${meaning}`);
 
@@ -104,24 +102,39 @@ function isLastLetter(element) {
   });
 }
 
+function hasGameEndedWithWrongGuess() {
+  return rows().at(-1).some(letter => letter.getAttribute('data-state') == 'absent');
+}
+
+function displaySecretWordMeaning() {
+  setTimeout(() => {
+    const secretWordElement = document.querySelector('div[aria-live="polite"]');
+    const secretWord = secretWordElement.innerText;
+
+    fetchWordMeaning(secretWord, meaning => {
+      createAndShowDialog(secretWordElement, secretWord, meaning);
+    });
+  }, 500);
+}
+
 function handleMutation(mutationsList) {
   for (const mutation of mutationsList) {
     if (mutation.type === 'attributes' && mutation.attributeName === 'data-state') {
       const element = mutation.target;
       const state = element.getAttribute('data-state');
 
-      console.log(`Element's data-state changed to: ${state}, with letter: ${element.innerText}`);
-      
       if (GUESSED_STATES.includes(state) && isLastLetter(element)) {
         displayLastWordMeaning(element);
+
+        if (hasGameEndedWithWrongGuess()) {
+          displaySecretWordMeaning();
+        }
       }
     }
   }
 }
 
 function startGame() {
-  console.log('Game is starting...');
-
   const tilesObserver = new MutationObserver(handleMutation);
 
   tiles().forEach(element => {
