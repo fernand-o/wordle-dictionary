@@ -7,9 +7,9 @@ var css = `
   z-index: 1000;
 }
 .meaning-dialog-content {
-  background: #fff;
+  background-color: var(--color-absent);
+  color: var(--key-evaluated-text-color-absent);
   padding: 10px;
-  border-radius: 5px;
   width: 300px;
   text-align: center;
   position: relative;
