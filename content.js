@@ -14,13 +14,6 @@ var css = `
   text-align: center;
   position: relative;
 }
-.meaning-dialog-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 20px;
-  cursor: pointer;
-}
 `;
 
 var style = document.createElement('style');
@@ -34,7 +27,6 @@ function createAndShowDialog(targetElement, word, meaning) {
   dialog.className = 'meaning-dialog';
   dialog.innerHTML = `
     <div class="meaning-dialog-content">
-      <span class="meaning-dialog-close" style="cursor: pointer;">&times;</span>
       <p><b>${word}</b>: ${meaning}</p>
     </div>
   `;
@@ -48,10 +40,6 @@ function createAndShowDialog(targetElement, word, meaning) {
   } else {
     dialog.style.right = (window.scrollX + rect.right + 30) + 'px';
   }
-
-  dialog.querySelector('.meaning-dialog-close').addEventListener('click', function() {
-    dialog.remove();
-  });
 
   document.body.appendChild(dialog);
 }
